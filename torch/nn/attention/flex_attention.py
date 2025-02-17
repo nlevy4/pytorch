@@ -970,7 +970,13 @@ def _nested_mod_func_adapter(
     if is_score_mod:
 
         def nt_score_mod(score, b, h, q_idx, kv_idx):
-            b_nested = q_seq_idx[q_idx]
+            
+            # Convert g_idx and kv_idx to int32
+            q_idx = q_idx.to(torch.int32)
+            kv_idx = kv_idx.to(torch.int32)
+           
+            # Convert q_idx to int if it has one element, otherwise use it as is
+            b_nested = q_seq_idx[q_idx.item()] if q_idx.numel() == 1 else q_seq_idx[q_idx]
             q_nested = q_idx - q_offsets[q_seq_idx[q_idx]]
             kv_nested = kv_idx - kv_offsets[kv_seq_idx[kv_idx]]
             is_same_sequence = q_seq_idx[q_idx] == kv_seq_idx[kv_idx]
@@ -985,7 +991,13 @@ def _nested_mod_func_adapter(
     else:
 
         def nt_mask_mod(b, h, q_idx, kv_idx):
-            b_nested = q_seq_idx[q_idx]
+
+            # Convert g_idx and kv_idx to int32
+            q_idx = q_idx.to(torch.int32)
+            kv_idx = kv_idx.to(torch.int32)
+            
+            # Convert q_idx to int if it has one element, otherwise use it as is
+            b_nested = q_seq_idx[q_idx.item()] if q_idx.numel() == 1 else q_seq_idx[q_idx]
             q_nested = q_idx - q_offsets[q_seq_idx[q_idx]]
             kv_nested = kv_idx - kv_offsets[kv_seq_idx[kv_idx]]
             # don't allow inter-sequence attention
